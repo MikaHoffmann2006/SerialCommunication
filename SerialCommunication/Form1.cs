@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -248,6 +249,7 @@ namespace SerialCommunication
         {
             timerOefening3.Enabled = tabControl.SelectedIndex == 3;
             timerOefening4.Enabled = tabControl.SelectedIndex == 4;
+            timerOefening5.Enabled = tabControl.SelectedIndex == 5;
 
         }
 
@@ -301,6 +303,49 @@ namespace SerialCommunication
                     antwoord = antwoord.Substring(4);
                     labelAnalog0.Text = antwoord;
                     int value = Int32.Parse(antwoord);
+
+                }
+            }
+            catch (Exception exception)
+            {
+                labelStatus.Text = "Error: " + exception.Message;
+                serialPortArduino.Close();
+                radioButtonVerbonden.Checked = false;
+                buttonConnect.Text = "Connect";
+            }
+        }
+
+        private void timerOefening5_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino.IsOpen)
+                {
+                    serialPortArduino.ReadExisting();
+                    string commando = "get a0";
+                    serialPortArduino.WriteLine(commando);
+                    string antwoord = serialPortArduino.ReadLine();
+                    antwoord = antwoord.TrimEnd();
+                    antwoord = antwoord.Substring(4);
+                    int value = Int32.Parse(antwoord);
+                    double rico = 0.039;
+                    double temp = (Math.Round(rico * value, 1) + 5);
+                    string gewenst = String.Format("{0} °C", temp.ToString("F1"));
+                    labelGewensteTemp.Text = gewenst;
+                    commando = "get a1";
+                    serialPortArduino.WriteLine(commando);
+                    string antwoord2= serialPortArduino.ReadLine();
+                    antwoord2= antwoord2.TrimEnd();
+                    antwoord2 = antwoord2.Substring(4);
+                    int value2 = Int32.Parse(antwoord2);
+                    double rico2 = 0.488758553;
+                    double meting = Math.Round(rico2 * value2, 1);
+                    string gemeten = String.Format("{0} °C", meting.ToString("F1"));
+                    labelHuidigeTemp.Text = gemeten;
+                    if (meting < temp) commando = "set d2 high";
+                    else commando = "set d2 low";
+                    serialPortArduino.WriteLine(commando);
+
 
                 }
             }
