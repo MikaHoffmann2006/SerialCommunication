@@ -339,7 +339,7 @@ namespace SerialCommunication
                     antwoord2 = antwoord2.Substring(4);
                     int value2 = Int32.Parse(antwoord2);
                     double rico2 = 0.488758553;
-                    double meting = Math.Round(rico2 * value2, 1);
+                    double meting = Math.Round((rico2 * value2)-273, 1);
                     string gemeten = String.Format("{0} °C", meting.ToString("F1"));
                     labelHuidigeTemp.Text = gemeten;
                     if (meting < temp) commando = "set d2 high";
@@ -347,6 +347,12 @@ namespace SerialCommunication
                     serialPortArduino.WriteLine(commando);
 
 
+                }
+                else
+                {
+                    labelStatus.Text = "Kabel niet verbonden";
+                    radioButtonVerbonden.Checked = false;
+                    buttonConnect.Text = "Connect";
                 }
             }
             catch (Exception exception)
